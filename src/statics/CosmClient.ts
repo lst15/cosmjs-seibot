@@ -1,58 +1,71 @@
-import {GasPrice, SigningStargateClient, StargateClient} from "@cosmjs/stargate";
-import {AccountData, DirectSecp256k1Wallet, OfflineDirectSigner} from "@cosmjs/proto-signing";
-import {env} from "../env-schema";
-import {msg} from "./cosmMessage";
+import { GasPrice, StargateClient } from "@cosmjs/stargate";
+import {
+  AccountData,
+  DirectSecp256k1Wallet,
+  OfflineDirectSigner,
+} from "@cosmjs/proto-signing";
+import { env } from "../env-schema";
+import { cosmMessage } from "./cosmMessage";
+import { SigningCosmWasmClient } from "@cosmjs/cosmwasm-stargate";
+
 export class CosmClientStatic {
-    private client:StargateClient;
-    private signOfflineClient:DirectSecp256k1Wallet;
-    private signOnlineClient:SigningStargateClient;
-    private rpc:string;
-    private account:readonly AccountData[];
-    private gasPrice = GasPrice.fromString("0.025usei");
+  private client!: StargateClient;
+  private signOfflineClient!: DirectSecp256k1Wallet;
+  private signOnlineClient!: SigningCosmWasmClient;
+  private rpc!: string;
+  private account!: readonly AccountData[];
+  private gasPrice = GasPrice.fromString("0.025usei");
+  private testCli!: any;
 
-    async setClient(rpc:string){
-        this.rpc = rpc;
-        this.client = await StargateClient.connect(rpc);
-        return this.client
-    }
+  async setClient(rpc: string) {
+    this.rpc = rpc;
+    this.client = await StargateClient.connect(rpc);
+    return this.client;
+  }
 
-    getClient(): StargateClient {
-        return this.client;
-    }
+  getClient(): StargateClient {
+    return this.client;
+  }
 
-    async initializeSignOfflineClient()  {
-        this.signOfflineClient = await DirectSecp256k1Wallet.fromKey(Buffer.from(env.PRIVATE_KEY, "hex"),"sei");
+  async initializeSignOfflineClient() {
+    console.log(this.rpc, env.PRIVATE_KEY);
+    this.signOfflineClient = await DirectSecp256k1Wallet.fromKey(
+      Buffer.from(env.PRIVATE_KEY, "hex"),
+      "sei"
+    );
 
-        this.account = await this.signOfflineClient.getAccounts()
-        msg.execute_swap_operations.to = this.account[0].address;
-        return this.signOfflineClient;
-    }
+    this.account = await this.signOfflineClient.getAccounts();
+    // cosmMessage.execute_swap_operations.to = this.account[0].address;
+    return this.signOfflineClient;
+  }
 
-    async initializeSignOnlineClient()  {
-        this.signOnlineClient = await SigningStargateClient.connectWithSigner(this.rpc, this.signOfflineClient, {gasPrice:this.gasPrice});
-        return this.signOnlineClient;
-    }
+  async initializeSignOnlineClient() {
+    this.signOnlineClient = await SigningCosmWasmClient.connectWithSigner(
+      this.rpc,
+      this.signOfflineClient,
+      { gasPrice: this.gasPrice }
+    );
 
-    getOfflineSignClient(): DirectSecp256k1Wallet{
-        return this.signOfflineClient;
-    }
+    return this.signOnlineClient;
+  }
 
-    getOnlineSignClient(){
-        return this.signOnlineClient
-    }
+  getOfflineSignClient(): DirectSecp256k1Wallet {
+    return this.signOfflineClient;
+  }
 
-    getAccount(): readonly AccountData[]{
-        return this.account;
-    }
+  getOnlineSignClient() {
+    return this.signOnlineClient;
+  }
 
-    async getBalance()   {
-        return await this.client.getBalance(this.account[0].address,"usei");
-    }
+  getAccount(): readonly AccountData[] {
+    return this.account;
+  }
 
-    async swap(){
-        const msg = {
+  async getBalance() {
+    return await this.client.getBalance(this.account[0].address, "usei");
+  }
 
-        }
-    }
-
+  async swap() {
+    const msg = {};
+  }
 }
