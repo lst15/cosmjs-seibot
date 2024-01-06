@@ -5,7 +5,7 @@ import {
   OfflineDirectSigner,
 } from "@cosmjs/proto-signing";
 import { env } from "../env-schema";
-import { cosmMessage } from "./cosmMessage";
+import { cosmMessage, cosmMessageX } from "./cosmMessage";
 import { SigningCosmWasmClient } from "@cosmjs/cosmwasm-stargate";
 
 export class CosmClientStatic {
@@ -14,13 +14,17 @@ export class CosmClientStatic {
   private signOnlineClient!: SigningCosmWasmClient;
   private rpc!: string;
   private account!: readonly AccountData[];
-  private gasPrice = GasPrice.fromString("0.025usei");
+  private gasPrice = GasPrice.fromString(`${env.GAS_PRICE}usei`);
   private testCli!: any;
 
   async setClient(rpc: string) {
     this.rpc = rpc;
     this.client = await StargateClient.connect(rpc);
     return this.client;
+  }
+
+  getGasPrice(){
+    return this.gasPrice;
   }
 
   getClient(): StargateClient {
@@ -61,11 +65,25 @@ export class CosmClientStatic {
     return this.account;
   }
 
-  async getBalance() {
+  async getBalance() {    
+    //while(true){
+      //this.signOnlineClient.simulate(this.account[0].address,cosmMessageX,undefined).then(console.log)
+   // }
+
     return await this.client.getBalance(this.account[0].address, "usei");
   }
 
-  async swap() {
-    const msg = {};
+  async getTokenInfo(contractAddress:string):Promise<{
+    name:string,symbol:string,decimals:number,total_supply:string
+  }>{
+    return await this.signOnlineClient.queryContractSmart(contractAddress,{token_info:{}})
+  }
+
+  async getTokenBalance(contractAddress:string):Promise<{balance:string}> {
+    return await this.signOnlineClient.queryContractSmart(contractAddress,{
+      balance:{
+          address:this.account[0].address
+      }
+    })
   }
 }
