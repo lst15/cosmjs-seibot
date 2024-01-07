@@ -1,9 +1,11 @@
 import { Coin } from "@cosmjs/amino";
-import { cosm } from "../server";
+import { cosm, pool } from "../server";
 import { cosmMessage } from "../statics/cosmMessage";
 import { env } from "../env-schema";
 import { ExecuteSwapOperationsDTO } from "../telegram/dto/ExecuteSwapOperationsDTO";
 import { executeBruteForceBuyDTO } from "../telegram/dto/executeBruteForceBuyDTO";
+import telebot from "telebot";
+import { executeBuy_buildMessage } from "../telegram/builders-response/executeSwapOperationsBuilderResponse";
 
 export class TransactionService {
     async executeSwapOperations(msg:string){
@@ -27,32 +29,25 @@ export class TransactionService {
         return transaction
     }
 
-    async executeBruteForceBuy(msg:string){
-        const [address,quantity,tries] = executeBruteForceBuyDTO(msg);
-        let count = 0;
-        const formatTries = Number(tries)
+    async executeBruteForceBuy(msg:any,telegram_bot:telebot,loading_message:any){
         let transaction = {};
+        pool.addBfBuyPool(msg.message_id)
 
-        while(count < formatTries) {
-            console.log("tentativa n:",count)
+        while(pool.isActivedBfByPool(msg.message_id)){
+
             try {
-                transaction = await this.executeSwapOperations(msg)
+                transaction = await this.executeSwapOperations(msg.text)
+                await telegram_bot.sendMessage(
+                    msg.from.id,
+                    executeBuy_buildMessage(transaction),
+                    { replyToMessage: msg.message_id }
+                  );                
                 break;                
-            } catch (error) {
-                console.log(error)
-                if(String(error).includes("execute wasm contract failed"))
-                {
-                    count += 1
-                } else {
-                    throw error;
-                }
-
-            }
-
-            
+            } catch (error) {}
         }
 
-        return transaction
+        pool.rmBfBuyPool(msg.message_id)
+        
     }
 
 }

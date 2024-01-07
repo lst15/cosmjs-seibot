@@ -6,9 +6,9 @@ export function TelegramExceptionsDeco() {
             let response;
 
             try {
-                response = await originalMethod.call(this, msg);
+                response = await originalMethod.call(this, msg);                
             } catch (error: any) {
-                response = String(error);
+                throw error;
             }
 
             return response;

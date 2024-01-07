@@ -1,3 +1,4 @@
+import telebot from "telebot";
 import { env } from "../env-schema";
 import { SetMainnetRpcDTO } from "../telegram/dto/SetMainnetRpcDTO";
 import { SetPrivateKeyDTO } from "../telegram/dto/SetPrivateKeyDTO";
@@ -59,8 +60,9 @@ export class ConfigurationService {
         return env.ROUTER;
     }
 
-    getGasPrice(msg:string){
-        return env.GAS_PRICE;
+    async getGasPrice(msg:any,telegram_bot:telebot,loading_message:any){
+        await new Promise(r => setTimeout(r, 5000));
+        return env.GAS_PRICE
     }
 
     setGasPrice(msg:string){

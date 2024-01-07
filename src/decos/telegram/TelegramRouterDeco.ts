@@ -20,8 +20,8 @@ export function TelegramRouterDeco(command: string) {
   return function (target: any, propertyKey: string, descriptor: PropertyDescriptor) {
     const originalMethod = descriptor.value;
 
-    descriptor.value = async function (msg: any) {
-      return await originalMethod.call(this,msg);
+    descriptor.value = async function (msg: any,telegram_bot:telebot,loading_message:any) {      
+      return await originalMethod.call(this,msg,telegram_bot,loading_message);
     };
 
     telegram_bot.on(`/${command}`, async (msg, props) => {
@@ -33,17 +33,8 @@ export function TelegramRouterDeco(command: string) {
         "Executando ação, aguarde! (aguarde esta mensagem ser atualizada)" as any,
         { replyToMessage: msg.message_id }
       );
-
-      response = await descriptor.value.call(null, msg.text);        
-
-      await telegram_bot.editMessageText(
-        {
-          chatId: loading_message.chat.id,
-          messageId: loading_message.message_id,
-        },
-        response,
-        {parseMode:"markdown"}
-      );
+        
+      response = await descriptor.value.call(null, msg,telegram_bot,loading_message); 
 
       return response;
     });
