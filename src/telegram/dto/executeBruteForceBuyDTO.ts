@@ -1,7 +1,7 @@
 import { ParameterErrors } from "../../enums"
 
-export function ExecuteSwapOperationsDTO(msg:string){
-    const [command, address, quantity] = msg.split(" ")
+export function executeBruteForceBuyDTO(msg:string){
+    const [command, address, quantity,tries] = msg.split(" ")
 
     switch(command){
         case undefined:
@@ -19,5 +19,11 @@ export function ExecuteSwapOperationsDTO(msg:string){
             throw new Error(`${ParameterErrors.INVALID_PARAMETERS} (quantity)`)        
     }
 
-    return [address, quantity];
+    const validateNumberTries = isNaN(Number(tries)) ? "0" : quantity
+    switch(validateNumberTries){
+        case "0" :
+            throw new Error(`${ParameterErrors.INVALID_PARAMETERS} (tries)`)        
+    }
+
+    return [address, quantity,tries];
 }

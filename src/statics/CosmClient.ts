@@ -13,8 +13,7 @@ export class CosmClientStatic {
   private signOfflineClient!: DirectSecp256k1Wallet;
   private signOnlineClient!: SigningCosmWasmClient;
   private rpc!: string;
-  private account!: readonly AccountData[];
-  private gasPrice = GasPrice.fromString(`${env.GAS_PRICE}usei`);
+  private account!: readonly AccountData[];  
   private testCli!: any;
 
   async setClient(rpc: string) {
@@ -24,7 +23,7 @@ export class CosmClientStatic {
   }
 
   getGasPrice(){
-    return this.gasPrice;
+    return env.GAS_PRICE;
   }
 
   getClient(): StargateClient {
@@ -32,7 +31,6 @@ export class CosmClientStatic {
   }
 
   async initializeSignOfflineClient() {
-    console.log(this.rpc, env.PRIVATE_KEY);
     this.signOfflineClient = await DirectSecp256k1Wallet.fromKey(
       Buffer.from(env.PRIVATE_KEY, "hex"),
       "sei"
@@ -44,12 +42,12 @@ export class CosmClientStatic {
   }
 
   async initializeSignOnlineClient() {
-    this.signOnlineClient = await SigningCosmWasmClient.connectWithSigner(
+    this.signOnlineClient = await SigningCosmWasmClient.connectWithSigner(      
       this.rpc,
       this.signOfflineClient,
-      { gasPrice: this.gasPrice }
+      { gasPrice: GasPrice.fromString(`${env.GAS_PRICE}usei`) }
     );
-
+    
     return this.signOnlineClient;
   }
 

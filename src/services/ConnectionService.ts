@@ -1,14 +1,13 @@
+import { env } from "../env-schema";
 import { cosm } from "../server";
+import { StartDTO } from "../telegram/dto/StartDTO";
 
 export class ConnectionService {
-    async startClient(msg:any){
-        //const [command] = msg.split(" ");
-
-        const mainnet = "https://rpc.wallet.pacific-1.sei.io"
-        const testnet = "https://sei-testnet-rpc.polkachu.com/"
+    async startClient(msg:any){        
+        const ambient = StartDTO(msg);
 
         try {
-            await cosm.setClient(mainnet);    
+            await cosm.setClient(ambient == "mainnet" ? env.MAINNET_RPC : env.TESTNET_RPC);
         } catch (error) {
             throw error;
         }

@@ -1,15 +1,16 @@
 import telebot from "telebot";
 import { env } from "../env-schema";
-import { CommandRouter, telegram_bot } from "./CommandRouter";
+import {  TelegramRouterDeco, telegram_bot } from "../decos/telegram/TelegramRouterDeco";
 
 import { ConfigurationService } from "../services/ConfigurationService";
 import { TransactionService } from "../services/TransactionService";
 import { executeBuy_buildMessage } from "./builders-response/executeSwapOperationsBuilderResponse";
 import { CallService } from "../services/CallService";
 import { tokeInfo_BuilderResponse } from "./builders-response/tokeInfoBuilderResponse";
-import { NeedsDefinedConfig } from "../rules/NeedsDefinedConfig";
-import { cosm } from "../server";
+import { RuleDefinedConfigDeco } from "../decos/rules/RuleDefinedConfigDeco";
+import { cosm, startCosm } from "../server";
 import { ConnectionService } from "../services/ConnectionService";
+import { TelegramExceptionsDeco } from "../decos/telegram/TelegramExceptionsDeco";
 
 const callService = new CallService();
 const configurationService = new ConfigurationService();
@@ -19,64 +20,82 @@ const connectionService = new ConnectionService();
 export class TelegramController{
 
     constructor(){
+        this.start("/start mainnet")
         telegram_bot.start()
     }
 
-    @CommandRouter("baltoken")
+    @TelegramRouterDeco("baltoken")
     async getBalance(msg:string){
         const balance = await callService.getTokenBalance(msg)
         return balance
     }
     
-    @CommandRouter("bal")
-    @NeedsDefinedConfig("PRIVATE_KEY")
+    @TelegramRouterDeco("bal")
+    @TelegramExceptionsDeco()
+    @RuleDefinedConfigDeco(["PRIVATE_KEY"])
     async myBalance(msg:string){
         return await callService.getBalance(msg)
     }
 
-    @CommandRouter("pvkey")
+    @TelegramRouterDeco("pvkey")
+    @TelegramExceptionsDeco()
     setPrivateKey(msg:string){
         return configurationService.setPrivateKey(msg);
     }
 
-    @CommandRouter("buy")
-    @NeedsDefinedConfig("PRIVATE_KEY")
-    @NeedsDefinedConfig("ROUTER")
+    @TelegramRouterDeco("buy")
+    @TelegramExceptionsDeco()
+    @RuleDefinedConfigDeco(["PRIVATE_KEY","ROUTER"])    
     async executeBuy(msg:string){
         const transaction = await transactionService.executeSwapOperations(msg)
         return executeBuy_buildMessage(transaction)
     }
 
-    @CommandRouter("setrouter")
+    @TelegramRouterDeco("bfbuy")
+    @TelegramExceptionsDeco()
+    @RuleDefinedConfigDeco(["PRIVATE_KEY","ROUTER"])    
+    async executeBfBuy(msg:string){
+        const transaction = await transactionService.executeBruteForceBuy(msg)
+        return executeBuy_buildMessage(transaction)
+    }
+
+    @TelegramRouterDeco("setrouter")
+    @TelegramExceptionsDeco()
     setRouter(msg:string){
         return configurationService.setRouterSwap(msg);
     }
 
-    @CommandRouter("tokeinfo")
+    @TelegramRouterDeco("tokeinfo")
+    @TelegramExceptionsDeco()
     async tokenInfo(msg:string){
         const call = await callService.getTokenInfo(msg);
         return tokeInfo_BuilderResponse(call);
     }
 
-    @CommandRouter("gas")
+    @TelegramRouterDeco("gas")
+    @TelegramExceptionsDeco()
     async gasPrice(msg:string){
         return configurationService.getGasPrice(msg)
     }
 
 
-    @CommandRouter("setgas")
+    @TelegramRouterDeco("setgas")
+    @TelegramExceptionsDeco()
     async setGasPrice(msg:string){
-        return configurationService.setGasPrice(msg)
+        return configurationService.setGasPrice(msg)        
     }
 
-    @CommandRouter("router")
+    @TelegramRouterDeco("router")
+    @TelegramExceptionsDeco()
     async getRouter(msg:string){
         return configurationService.getRouterSwap(msg);
     }
 
-    @CommandRouter("start")
-    @NeedsDefinedConfig("PRIVATE_KEY")
+    @TelegramRouterDeco("start")
+    @TelegramExceptionsDeco()
+    @RuleDefinedConfigDeco(["PRIVATE_KEY","TESTNET_RPC","MAINNET_RPC","GAS_PRICE","ROUTER"])
     async start(msg:string){
+        startCosm()
         const start_Client = await connectionService.startClient(msg);
         const start_signOffline = await connectionService.startSignOfflineClient(msg);
         const start_signOnline = await connectionService.startSignOnlineClient(msg);

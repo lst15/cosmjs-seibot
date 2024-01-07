@@ -1,6 +1,8 @@
 import { env } from "../env-schema";
+import { SetMainnetRpcDTO } from "../telegram/dto/SetMainnetRpcDTO";
 import { SetPrivateKeyDTO } from "../telegram/dto/SetPrivateKeyDTO";
 import { SetRouterDTO } from "../telegram/dto/SetRouterDTO";
+import { SetTestnetRpcDTO } from "../telegram/dto/SetTestnetRpcDTO";
 import { SetGasPriceDTO } from "../telegram/dto/setGasPriceDTO";
 import { envUpdate } from "../utils/env-update";
 
@@ -29,6 +31,30 @@ export class ConfigurationService {
         return 200
     }
 
+    setTestnetRpc(msg:string){        
+        const rpc = SetTestnetRpcDTO(msg)
+
+        envUpdate([{
+            key:"TESTNET_RPC",
+            value:rpc
+        }])
+        env.TESTNET_RPC = rpc;
+        
+        return 200
+    }
+
+    setMainnetRpc(msg:string){        
+        const rpc = SetMainnetRpcDTO(msg)
+
+        envUpdate([{
+            key:"MAINNET_RPC",
+            value:rpc
+        }])
+        env.MAINNET_RPC = rpc;
+        
+        return 200
+    }
+
     getRouterSwap(msg:string){
         return env.ROUTER;
     }
@@ -37,7 +63,7 @@ export class ConfigurationService {
         return env.GAS_PRICE;
     }
 
-    setGasPrice(msg:string){        
+    setGasPrice(msg:string){
         const gas = SetGasPriceDTO(msg);
         
         envUpdate([{
