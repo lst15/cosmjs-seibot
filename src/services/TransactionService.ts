@@ -30,6 +30,7 @@ export class TransactionService {
     }
 
     async executeBruteForceBuy(msg:any,telegram_bot:telebot,loading_message:any){
+        const [address,quantity] = ExecuteSwapOperationsDTO(msg.text);
         let transaction = {};
         pool.addBfBuyPool(msg.message_id)
 
@@ -40,7 +41,7 @@ export class TransactionService {
                 await telegram_bot.sendMessage(
                     msg.from.id,
                     executeBuy_buildMessage(transaction),
-                    { replyToMessage: msg.message_id }
+                    { replyToMessage: msg.message_id,parseMode:"markdown" }
                   );                
                 break;                
             } catch (error) {}
