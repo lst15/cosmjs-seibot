@@ -9,6 +9,7 @@ export const telegram_bot = new telebot({
 
 
 telegram_bot.on('sticker', (msg) => {
+  console.log(msg.reply_to_message)
   return telegram_bot.sendMessage(
     msg.from.id,
     "Executando ação, aguarde! (aguarde esta mensagem ser atualizada)" as any,

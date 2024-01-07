@@ -8,7 +8,7 @@ import { SetGasPriceDTO } from "../telegram/dto/setGasPriceDTO";
 import { envUpdate } from "../utils/env-update";
 
 export class ConfigurationService {
-    setPrivateKey(msg:string){        
+    async setPrivateKey(msg:any,telegram_bot:telebot,loading_message:any){        
         const privateKey = SetPrivateKeyDTO(msg);
 
         envUpdate([{
@@ -20,7 +20,7 @@ export class ConfigurationService {
         return 200
     }
 
-    setRouterSwap(msg:string){        
+    async setRouterSwap(msg:any,telegram_bot:telebot,loading_message:any){        
         const address = SetRouterDTO(msg)
 
         envUpdate([{
@@ -32,7 +32,7 @@ export class ConfigurationService {
         return 200
     }
 
-    setTestnetRpc(msg:string){        
+    setTestnetRpc(msg:any,telegram_bot:telebot,loading_message:any){        
         const rpc = SetTestnetRpcDTO(msg)
 
         envUpdate([{
@@ -44,7 +44,7 @@ export class ConfigurationService {
         return 200
     }
 
-    setMainnetRpc(msg:string){        
+    setMainnetRpc(msg:any,telegram_bot:telebot,loading_message:any){        
         const rpc = SetMainnetRpcDTO(msg)
 
         envUpdate([{
@@ -56,7 +56,7 @@ export class ConfigurationService {
         return 200
     }
 
-    getRouterSwap(msg:string){
+    async getRouterSwap(msg:any,telegram_bot:telebot,loading_message:any){
         return env.ROUTER;
     }
 
@@ -65,7 +65,7 @@ export class ConfigurationService {
         return env.GAS_PRICE
     }
 
-    setGasPrice(msg:string){
+    async setGasPrice(msg:any,telegram_bot:telebot,loading_message:any){
         const gas = SetGasPriceDTO(msg);
         
         envUpdate([{
